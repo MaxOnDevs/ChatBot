@@ -1,0 +1,275 @@
+/* =========================================================
+   Assistente Personale - stile "The Record Buddy"
+   Sostituisce style.css. Non servono modifiche a index.html e app.js.
+
+   Corrispondenza tra gli elementi del widget (chatbot.js + demo.css)
+   e gli elementi della tua app:
+
+   .chat (pannello)        ->  .chat-container
+   .chat-head              ->  header   (h1 = titolo, p = stato "online")
+   .avatar (bot nel head)  ->  header::before
+   .chat-body              ->  #messages
+   .msg + .bubble          ->  .message  (+ avatar con ::before)
+   .msg.user / .msg (bot)  ->  .message.user / .message.bot
+   .chat-form              ->  #chat-form
+   input / .btn            ->  #message / #chat-form button
+   ========================================================= */
+
+/* 1 Variabili (stessi valori di demo.css) */
+:root {
+  --bg: #efebe3;
+  --panel: #fffdf9;
+  --panel-2: #f6f2ea;
+  --line: #ddd6c8;
+  --text: #1f2933;
+  --gold: #c49b63;
+  --gold-2: #dcb87f;
+  --navy: #1d3a4d;
+  --danger: #c2492f;
+  --serif: Georgia, "Times New Roman", serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --radius: 4px;
+  --avatar: 38px;      /* diametro degli avatar */
+  --avatar-gap: 46px;  /* spazio riservato all'avatar accanto alle bolle */
+
+  /* Avatar del bot: disco in vinile disegnato solo con CSS
+     (stessa grafica dell'SVG usato in chatbot.js) */
+  --bot-avatar: radial-gradient(circle closest-side,
+      #0a0a0a 0 6%, #c49b63 7% 25%, #0a0a0a 26% 65%, #1d3a4d 66%);
+}
+
+/* 2 Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font: 400 1rem/1.5 var(--sans);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* 3 Pannello della chat (come .chat nel widget, ma a pagina intera) */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  width: min(820px, 100% - 2rem);
+  height: calc(100vh - 2rem);   /* fallback */
+  height: calc(100dvh - 2rem);
+  margin: 1rem auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(31, 41, 51, .25);
+}
+
+/* 4 Header (come .chat-head): avatar + titolo + indicatore online */
+header {
+  display: grid;
+  grid-template-columns: var(--avatar) 1fr;
+  grid-template-rows: auto auto;
+  column-gap: .8rem;
+  align-items: center;
+  padding: .9rem 1rem;
+  background: var(--navy);
+  border-bottom: 0;
+}
+
+header::before {                 /* avatar del bot */
+  content: "";
+  grid-row: 1 / span 2;
+  width: var(--avatar);
+  height: var(--avatar);
+  border-radius: 50%;
+  background: var(--bot-avatar);
+  border: 2px solid var(--gold);
+}
+
+header h1 {                      /* come .chat-title strong */
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.1rem;
+  line-height: 1.25;
+  color: #fff;
+}
+
+header p {                       /* come .status: pallino verde + testo */
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  margin: 0;
+  font-size: .78rem;
+  color: #cfd8dc;
+}
+
+header p::before {
+  content: "";
+  width: .55rem;
+  height: .55rem;
+  border-radius: 50%;
+  background: #4cd964;
+  box-shadow: 0 0 0 3px rgba(76, 217, 100, .25);
+}
+
+/* 5 Area messaggi (come .chat-body) */
+#messages {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: .9rem;
+  padding: 1rem;
+  overflow-y: auto;
+  background: var(--bg);
+}
+
+/* 6 Bolle (come .msg + .bubble). Il bot e' a sinistra, l'utente a destra */
+.message {
+  position: relative;            /* serve per posizionare l'avatar */
+  align-self: flex-start;
+  max-width: calc(92% - var(--avatar-gap));
+  margin: 0 0 0 var(--avatar-gap);
+  padding: .6rem .85rem;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 12px 12px 12px 2px;
+  font-size: .92rem;
+  white-space: pre-wrap;         /* mantiene gli a capo delle risposte */
+  overflow-wrap: anywhere;
+}
+
+.message::before {               /* avatar accanto alla bolla */
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: calc(-1 * var(--avatar-gap));
+  width: var(--avatar);
+  height: var(--avatar);
+  border-radius: 50%;
+  background: var(--bot-avatar);
+  border: 2px solid var(--gold);
+}
+
+.message.user {
+  align-self: flex-end;
+  margin: 0 var(--avatar-gap) 0 0;
+  background: var(--gold);
+  color: #111;
+  border-color: var(--gold);
+  border-radius: 12px 12px 2px 12px;
+}
+
+.message.user::before {          /* avatar utente: cerchio oro con "TU" */
+  content: "TU";
+  left: auto;
+  right: calc(-1 * var(--avatar-gap));
+  display: grid;
+  place-items: center;
+  background: var(--gold);
+  color: #111;
+  font: 700 .75rem var(--sans);
+}
+
+/* Stati opzionali: si attivano solo se aggiungi le classi in app.js
+   (vedi le istruzioni). Senza classi non cambia nulla. */
+.message.typing {
+  opacity: .6;
+  font-style: italic;
+}
+
+.message.error {
+  border-color: var(--danger);
+}
+
+/* 7 Form di invio (come .chat-form) */
+#chat-form {
+  display: flex;
+  gap: .5rem;
+  padding: .8rem;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+}
+
+#chat-form input {
+  flex: 1;
+  min-width: 0;
+  padding: .7rem .8rem;
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font: inherit;
+}
+
+#chat-form input:focus {
+  border-color: var(--gold);
+  outline: none;
+}
+
+#chat-form button {              /* come .btn */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .6rem 1.1rem;
+  background: var(--gold);
+  color: #111;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#chat-form button::before {      /* icona "invia" disegnata con CSS, senza file esterni */
+  content: "";
+  width: 1.1em;
+  height: 1.1em;
+  background: currentColor;
+  -webkit-mask: var(--send-icon) center / contain no-repeat;
+  mask: var(--send-icon) center / contain no-repeat;
+  --send-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 2L11 13M22 2l-7 20-4-9-9-4z'/%3E%3C/svg%3E");
+}
+
+#chat-form button:hover {
+  background: var(--gold-2);
+}
+
+#chat-form button:disabled {     /* durante l'attesa della risposta di Ollama */
+  opacity: .5;
+  cursor: wait;
+}
+
+#chat-form button:focus-visible,
+#chat-form input:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* 8 Mobile: pannello a tutto schermo, come il widget sotto i 575px */
+@media (max-width: 575px) {
+  :root {
+    --avatar: 32px;
+    --avatar-gap: 40px;
+  }
+
+  .chat-container {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .message {
+    max-width: calc(100% - var(--avatar-gap));
+  }
+}
